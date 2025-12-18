@@ -7,8 +7,7 @@
 
 WIN_POPULATION = 5000   # Amount of population needed to win
 MAX_WORKERS = 5 # Max workers a player can have
-RESOURCE_CONSUMPTION = 10    # How much one population takes of a resource
-GAME_ON = True
+RESOURCE_CONSUMPTION = 1    # How much one population takes of a resource
 
 # Actions player can use in the game
 actions = ["1. Buy / Sell Resources | Buy Workers", "2. Assign Workers", "3. Buy Land / Build Structure", "4. End turn", "5. Quit"]
@@ -16,10 +15,10 @@ actions = ["1. Buy / Sell Resources | Buy Workers", "2. Assign Workers", "3. Buy
 # This is the city's information
 city = {
     "money": 5000,  # Currency in the game
-    "water": 100,   # Required for population
+    "water": 300,   # Required for population
     "food": 100,    # Required for population
     "population": 10,   # number of people in city & win condition
-    "rating": 50.0, # Multiplier for population growth
+    "rating": 50.0, # Rating based on city's rank  Should be 50
     "workers": 0,   # Workers are used increase ONE of your productions much faster
     "land": 1,  # Used to build structures
     "structures": 0,    # Build structures only on land you own
@@ -33,18 +32,51 @@ workers = {
 }
 
 
-def process_turn(city, workers, game_status):
+def process_turn(city, worker):
+    # Rating gain/loss
+    RATING_BONUS = 0.5
+    # Used to see how much population grows by
+    GROWTH_RATE = 0.05
+
     # Do resource consumption
+    RESOURCE_CONSUMPTION = city["population"]
     city["water"] -= RESOURCE_CONSUMPTION
     city["food"] -= RESOURCE_CONSUMPTION
+
+    capacity = min(city["water"], city["food"])
+    try:
+        pressure = city["population"] / capacity
+    except ZeroDivisionError:
+        pressure = city["population"] / 1
+    # Adjust population based on current resources (goes by lowest)
+    if city["rating"] < 100:
+        if city["population"] <= capacity:
+            # Grow by small fraction of population
+            city["rating"] += (1 - pressure) * RATING_BONUS
+            fixed_num = f"{city["rating"]:.2f}"
+            fixed_num = float(fixed_num)
+            city["rating"] = fixed_num
+            # Scale that by rating
+        else:
+            # Lose population
+            city["rating"] -= (pressure - 1) * RATING_BONUS
+            fixed_num = f"{city["rating"]:.2f}"
+            fixed_num = float(fixed_num)
+            city["rating"] = fixed_num
+    # clamp the value for rating
+    city["rating"] = max(0, min(100, city["rating"]))
+
     # Implement win / lose condition
-    if city["rating"] < 25.0 and city["population"] < 0 or city["water"] < 0 or city["food"] < 0:
+    if city["rating"] <= 0 or city["population"] <= 0 or (city["water"] <= 0 or city["food"] <= 0):
         print("You lose")
-        game_status = False
-    elif city["rating"] > 0 and city["population"] == WIN_POPULATION and city["water"] > 0 and city["food"] > 0:
+        return False
+    elif (city["rating"] >= 80.00 and city["population"] >= WIN_POPULATION) and (city["water"] > 0 and city["food"] > 0):
         print("You win")
+        return False
     else:
-        pass
+        rating_factor = (city["rating"] - 50) / 50
+        city["population"] += floor(city["population"] * rating_factor * GROWTH_RATE)
+        return True
 
 
 # This will display the city's information
@@ -69,8 +101,11 @@ def main_game(city, workers):
             print(f"{action}")
 
         # Ask Player to pick option
-        choice = input("Pick Option (By Number): ").strip()
-        choice = int(choice)
+        try:
+            choice = input("Pick Option (By Number): ").strip()
+            choice = int(choice)
+        except ValueError:
+            print("Please enter option by number.")
         # Correlate player choice with action
         match choice:
             # Buy / Sell Resources | Buy Workers
@@ -84,7 +119,7 @@ def main_game(city, workers):
                 print("Option 3")
                 pass
             case 4:
-                process_turn(city, workers, game_on)
+                game_on = process_turn(city, workers)
                 pass
             case 5:
                 game_on = False
