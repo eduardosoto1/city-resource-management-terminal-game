@@ -5,6 +5,8 @@
 # Created by: XX
 # Date: 12/13/2025 - 
 
+import math
+
 WIN_POPULATION = 5000   # Amount of population needed to win
 MAX_WORKERS = 5 # Max workers a player can have
 RESOURCE_CONSUMPTION = 1    # How much one population takes of a resource
@@ -18,7 +20,7 @@ city = {
     "water": 300,   # Required for population
     "food": 100,    # Required for population
     "population": 10,   # number of people in city & win condition
-    "rating": 50.0, # Rating based on city's rank  Should be 50
+    "rating": 40.0, # Rating based on city's rank  Should be 50
     "workers": 0,   # Workers are used increase ONE of your productions much faster
     "land": 1,  # Used to build structures
     "structures": 0,    # Build structures only on land you own
@@ -31,40 +33,54 @@ workers = {
     "money": 0,
 }
 
+def adjust_population(city, workers, capacity, rating_bonus, growth_rate):
+    try:
+        pressure = city["population"] / capacity
+    except ZeroDivisionError:
+        pressure = city["population"] / 1
+    # Adjust population based on current recourses
+    if city["rating"] < 100:
+        if city["population"] <= capacity:
+            # Grow by small fraction of population
+            city["rating"] += (1 - pressure) * rating_bonus
+            fixed_num = f"{city["rating"]:.2f}"
+            fixed_num = float(fixed_num)
+            city["rating"] = fixed_num
+        else:
+            # lose population
+            city["rating"] -= (pressure - 1) * rating_bonus
+            fixed_num = f"{city["rating"]:.2f}"
+            fixed_num = float(fixed_num)
+            city["rating"] = fixed_num
+    # Clamp the city ratings
+    city["rating"] = max(0, min(100, city["rating"]))
+
+    growth = 1
+    rating_factor = (city["rating"] - 50) / 50
+    growth += city["population"] * rating_factor * growth_rate
+    growth = int(growth)
+    city["population"] += growth
+    growth -= growth
+
+    city["population"] = max(0, city["population"])
+
+
 
 def process_turn(city, worker):
     # Rating gain/loss
-    RATING_BONUS = 0.5
+    RATING_BONUS = 3
     # Used to see how much population grows by
-    GROWTH_RATE = 0.05
+    GROWTH_RATE = 0.10
 
+    # Calculate capacity
+    capacity = min(city["water"], city["food"])
     # Do resource consumption
     RESOURCE_CONSUMPTION = city["population"]
     city["water"] -= RESOURCE_CONSUMPTION
     city["food"] -= RESOURCE_CONSUMPTION
 
-    capacity = min(city["water"], city["food"])
-    try:
-        pressure = city["population"] / capacity
-    except ZeroDivisionError:
-        pressure = city["population"] / 1
-    # Adjust population based on current resources (goes by lowest)
-    if city["rating"] < 100:
-        if city["population"] <= capacity:
-            # Grow by small fraction of population
-            city["rating"] += (1 - pressure) * RATING_BONUS
-            fixed_num = f"{city["rating"]:.2f}"
-            fixed_num = float(fixed_num)
-            city["rating"] = fixed_num
-            # Scale that by rating
-        else:
-            # Lose population
-            city["rating"] -= (pressure - 1) * RATING_BONUS
-            fixed_num = f"{city["rating"]:.2f}"
-            fixed_num = float(fixed_num)
-            city["rating"] = fixed_num
-    # clamp the value for rating
-    city["rating"] = max(0, min(100, city["rating"]))
+    # Adjust population
+    adjust_population(city, workers, capacity, RATING_BONUS, GROWTH_RATE)
 
     # Implement win / lose condition
     if city["rating"] <= 0 or city["population"] <= 0 or (city["water"] <= 0 or city["food"] <= 0):
@@ -74,8 +90,6 @@ def process_turn(city, worker):
         print("You win")
         return False
     else:
-        rating_factor = (city["rating"] - 50) / 50
-        city["population"] += floor(city["population"] * rating_factor * GROWTH_RATE)
         return True
 
 
