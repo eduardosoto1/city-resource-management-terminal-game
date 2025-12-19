@@ -33,6 +33,20 @@ workers = {
     "money": 0,
 }
 
+
+# The shop inventory, should contain name, price. what it affects, and by how much?
+shop_inv = {
+    # Worker costs 2000 each, they can be assigned to collect a specific resource if structure permits, and they can collect 10 of the resource
+    "worker": ["Worker", 2000, "Assign to collect resource", 10],
+    "wood": ["Wood", 300, "Builds structure", 1],
+    "metals": ["Metals", 300, "Power grid & infrastructure (FOR LATER)", 1],
+    "ore": ["Ore", 300, "Sell for money or (INVEST | FOR FUTURE)", 1],
+    "animal": ["Animals", 300, "Converts into food & gives water as well", 100],
+    # Money is the only one that difers from cost as you need ore to buy this one (which is why cost is 1)
+    "money": ["Money", 1, "Upkeeps workers, structures, and used for buying", 100],
+}
+
+# Used to adjust the city's populating and rating
 def adjust_population(city, workers, capacity, rating_bonus, growth_rate):
     try:
         pressure = city["population"] / capacity
@@ -68,7 +82,7 @@ def adjust_population(city, workers, capacity, rating_bonus, growth_rate):
 
 def process_turn(city, worker):
     # Rating gain/loss
-    RATING_BONUS = 3
+    RATING_BONUS = 2
     # Used to see how much population grows by
     GROWTH_RATE = 0.10
 
@@ -92,7 +106,21 @@ def process_turn(city, worker):
     else:
         return True
 
-
+# This will display the shop menu
+def print_shop(shop_inv):
+    for value in shop_inv.items():
+        print(f"{value}")
+# This will Check if player can afford item, and apply the effects of item.
+def shop_menu(shop_inv):
+    # Print the shop menu
+    print_shop(shop_inv)
+    # Enforce one purchase per turn
+    turn_used = False   # If true, player should not be able to purchase anything
+    if turn_used:
+        print("Only one purchase per round!")
+        return
+    
+    
 # This will display the city's information
 def display_stats(city):
     # Output to player city for readibility
@@ -124,7 +152,7 @@ def main_game(city, workers):
         match choice:
             # Buy / Sell Resources | Buy Workers
             case 1:
-                print("Option 1")
+                shop_menu(shop_inv)
                 pass
             case 2:
                 print("Option 2")
