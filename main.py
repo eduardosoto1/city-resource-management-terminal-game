@@ -46,6 +46,9 @@ shop_inv = {
     "money": ["Money", 1, "Upkeeps workers, structures, and used for buying", 100],
 }
 
+structures = {
+    "Farm": 1
+}
 # Used to adjust the city's populating and rating
 def adjust_population(city, workers, capacity, rating_bonus, growth_rate):
     try:
@@ -108,19 +111,31 @@ def process_turn(city, worker):
 
 # This will display the shop menu
 def print_shop(shop_inv):
-    for value in shop_inv.items():
-        print(f"{value}")
+    for key, value in shop_inv.items():
+        name, price, description, growth = value
+        print(f"Name: {name:<10} ${price:<10} Description:{description:<10} +{growth:<10}")
+
 # This will Check if player can afford item, and apply the effects of item.
 def shop_menu(shop_inv):
     # Print the shop menu
     print_shop(shop_inv)
     # Enforce one purchase per turn
-    turn_used = False   # If true, player should not be able to purchase anything
-    if turn_used:
-        print("Only one purchase per round!")
+    turn_used = 0   # If true, player should not be able to purchase anything
+    while (turn_used == 0):
+        choice = input("Pick option by name:\n> ").lower().strip()
+        if choice == city[choice]:
+            print("Choice allowed")
+        else:
+            print("Not accepted")
+
+#This assigns workers to structure
+def assign_worker(city, workers, structures):
+    # If player has no workers, return
+    if city["workers"] < 1:
         return
-    
-    
+    for structure in structures:
+        print(structure)
+
 # This will display the city's information
 def display_stats(city):
     # Output to player city for readibility
@@ -155,7 +170,7 @@ def main_game(city, workers):
                 shop_menu(shop_inv)
                 pass
             case 2:
-                print("Option 2")
+                assign_worker(city, workers, structures)
                 pass
             case 3:
                 print("Option 3")
