@@ -45,13 +45,51 @@ workers = {
 # The shop inventory, should contain name, price. what it affects, and by how much?
 shop_inv = {
     # Worker costs 2000 each, they can be assigned to collect a specific resource if structure permits, and they can collect 10 of the resource
-    "worker": ["Worker", 2000, "Assign to collect resource", 10],
-    "wood": ["Wood", 300, "Builds structure", 1],
-    "metals": ["Metals", 300, "Power grid & infrastructure (FOR LATER)", 1],
-    "ore": ["Ore", 300, "Sell for money or (INVEST | FOR FUTURE)", 1],
-    "animals": ["Animals", 300, "Converts into food & gives water as well", 100],
+    "worker": {
+        "name": "Worker",
+        "cost": 2000,
+        "description": "Used to assign workers to structure",
+        "growth": 10
+    },
+    # Wood is used to build structures
+    "wood": {
+        "name": "Wood",
+        "cost": 300,
+        "description": "Builds structures",
+        "growth": 1
+    },
+    # Metals is used build power grids and infrastructure
+    #"metals": ["Metals", 300, "Power grid & infrastructure (FOR LATER)", 1],
+    "metals": {
+        "name": "Metals",
+        "cost": 300,
+        "description": "Builds power grid & infrastructure",
+        "growth": 1
+    },
+    # Ores will be used to sell to gain money or invest (FUTURE)
+    #"ore": ["Ore", 300, "Sell for money or (INVEST | FOR FUTURE)", 1],
+    "ore": {
+        "name": "Ore",
+        "cost": 300,
+        "description": "Sell for money",
+        "growth": 1
+    },
+    # Animals will convert into food and water for the city's population
+    #"animals": ["Animals", 300, "Converts into food & gives water as well", 100],
+    "animals": {
+        "name": "Animals",
+        "cost": 300,
+        "description": "Converts into food & gives water as well",
+        "growth": 100
+    },
     # Money is the only one that difers from cost as you need ore to buy this one (which is why cost is 1)
-    "money": ["Money", 1, "Upkeeps workers, structures, and used for buying", 100],
+    #"money": ["Money", 1, "Upkeeps workers, structures, and used for buying", 100],
+    "money": {
+        "name": "Money",
+        "cost": 1,
+        "description": "Upkeeps workers, structures, and used for buying (-1 Ore)",
+        "growth": 1
+    },
 }
 
 structures = {
