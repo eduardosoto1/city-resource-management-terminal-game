@@ -8,8 +8,9 @@
 # How does turn based mechanism work?:
 # - Player decides action (build, buy, assign)
 # - Calculate Capacity
-# - Adjust the Rating
-# - Adjust the Population based on rating
+# - Adjust the Rating based on food and water
+# - Create math formula using rating and # of structures to develop # for how much population increases & decreases
+# - Adjust the Population based on rating (lower than 50%, remove population by math formula and higher than 50%, add population by math formula))
 # - Consume resources based on population size
 # - Check if the player win or loses
 
@@ -26,7 +27,7 @@ actions = ["1. Buy / Sell Resources | Buy Workers", "2. Assign Workers", "3. Buy
 city = {
     "money": 5000,  # Currency in the game
     "water": 300,   # Required for population
-    "food": 100,    # Required for population
+    "food": 300,    # Required for population
     "population": 10,   # number of people in city & win condition
     "rating": 40.0, # Rating based on city's rank  Should be 50
     "workers": 0,   # Workers are used increase ONE of your productions much faster
@@ -98,64 +99,65 @@ structures = {
 }
 
 # Used to adjust the city's populating and rating
-def adjust_population(city, workers, capacity, rating_bonus, growth_rate):
-    try:
-        pressure = city["population"] / capacity
-    except ZeroDivisionError:
-        pressure = city["population"] / 1
-    # Adjust population based on current recourses
-    if city["rating"] < 100:
-        if city["population"] <= capacity:
-            # Grow by small fraction of population
-            city["rating"] += (1 - pressure) * rating_bonus
-            fixed_num = f"{city["rating"]:.2f}"
-            fixed_num = float(fixed_num)
-            city["rating"] = fixed_num
-        else:
-            # lose population
-            city["rating"] -= (pressure - 1) * rating_bonus
-            fixed_num = f"{city["rating"]:.2f}"
-            fixed_num = float(fixed_num)
-            city["rating"] = fixed_num
+
+#def adjust_population(city, workers, capacity, rating_bonus, growth_rate):
+ #   try:
+  #      pressure = city["population"] / capacity
+#    except ZeroDivisionError:
+#        pressure = city["population"] / 1
+#    # Adjust population based on current recourses
+#    if city["rating"] < 100:
+#        if city["population"] <= capacity:
+#            # Grow by small fraction of population
+#            city["rating"] += (1 - pressure) * rating_bonus
+#            fixed_num = f"{city["rating"]:.2f}"
+#            fixed_num = float(fixed_num)
+#            city["rating"] = fixed_num
+#        else:
+#            # lose population
+#            city["rating"] -= (pressure - 1) * rating_bonus
+#            fixed_num = f"{city["rating"]:.2f}"
+#            fixed_num = float(fixed_num)
+#            city["rating"] = fixed_num
     # Clamp the city ratings
-    city["rating"] = max(0, min(100, city["rating"]))
+#    city["rating"] = max(0, min(100, city["rating"]))
 
-    growth = 1
-    rating_factor = (city["rating"] - 50) / 50
-    growth += city["population"] * rating_factor * growth_rate
-    growth = int(growth)
-    city["population"] += growth
-    growth -= growth
+#    growth = 1
+#    rating_factor = (city["rating"] - 50) / 50
+#    growth += city["population"] * rating_factor * growth_rate
+#    growth = int(growth)
+#    city["population"] += growth
+#    growth -= growth
+#
+#    city["population"] = max(0, city["population"])
 
-    city["population"] = max(0, city["population"])
 
-
-
-def process_turn(city, worker):
-    # Rating gain/loss
-    RATING_BONUS = 2
-    # Used to see how much population grows by
-    GROWTH_RATE = 0.10
-
-    # Calculate capacity
-    capacity = min(city["water"], city["food"])
-    # Do resource consumption
-    RESOURCE_CONSUMPTION = city["population"]
-    city["water"] -= RESOURCE_CONSUMPTION
-    city["food"] -= RESOURCE_CONSUMPTION
-
-    # Adjust population
-    adjust_population(city, workers, capacity, RATING_BONUS, GROWTH_RATE)
-
-    # Implement win / lose condition
-    if city["rating"] <= 0 or city["population"] <= 0 or (city["water"] <= 0 or city["food"] <= 0):
-        print("You lose")
-        return False
-    elif (city["rating"] >= 80.00 and city["population"] >= WIN_POPULATION) and (city["water"] > 0 and city["food"] > 0):
-        print("You win")
-        return False
-    else:
-        return True
+#def process_turn(city, worker):
+#    # Rating gain/loss
+#    RATING_BONUS = 2
+#    # Used to see how much population grows by
+#    GROWTH_RATE = 0.10
+#
+#    # Calculate capacity
+#    capacity = min(city["water"], city["food"])
+#    # Do resource consumption
+#    RESOURCE_CONSUMPTION = city["population"]
+#    city["water"] -= RESOURCE_CONSUMPTION
+#    city["food"] -= RESOURCE_CONSUMPTION
+#
+#    # Adjust population
+#    adjust_population(city, workers, capacity, RATING_BONUS, GROWTH_RATE)
+#
+#    # Implement win / lose condition
+#    if city["rating"] <= 0 or city["population"] <= 0 or (city["water"] <= 0 or city["food"] <= 0):
+#        print("You lose")
+#        return False
+#    elif (city["rating"] >= 80.00 and city["population"] >= WIN_POPULATION) and (city["water"] > 0 and city["food"] > 0):
+#        print("You win")
+#        return False
+#    else:
+#        return True
+#
 
 #This assigns workers to structure
 def assign_worker(city, workers, structures):
@@ -170,6 +172,7 @@ def main():
 
 # The Main Game Loop
 def main_game(city, workers):
+    turned_on = 0   # This is used on to allow one purhcase for each turn
     game_on = True
     while game_on:
         # Display city stats
@@ -187,26 +190,68 @@ def main_game(city, workers):
             print("Please enter options 1 between 5.")
         # Correlate player option with choice
         match choice:
+            # Take player to shop menu
             case 1:
-                shop_menu(city, shop_inv)
+                turned_on = shop_menu(city, shop_inv, turned_on)
+            # Assign workers to structures
             case 2:
                 assign_worker(city, workers, structures)
+            # Buy Land / Structures
             case 3: 
                 pass
+            # End Turn
             case 4:
-                game_on = process_turn(city, workers)
+                # Old before i started updating 
+                #game_on = process_turn(city)
+                #turned_on -= 1
+                process_turn(city)
+            # End game completly
             case 5:
                 game_on = False
+            # Option not in list
             case _:
                 print("This option is not a choice, choices are 1-5")
 
-# This will change the city's rating
-def adjust_rating():
-    ...
+def calculate_capacity(city):
+    # Capacity comes from the lowest item we have, either water or food.
+    capacity = min(city["water"], city["food"])
+    capacity = int(capacity)
+    return capacity
 
-# This will change the city's population
-def adjust_population():
-    ...
+# Grows or decreases
+def adjust_pop(capacity):
+    # Initial population is 10
+    init_pop = 10
+    # Initial food is 100
+    init_resource = 100
+    # If the lowest resource is higher than the inital resource, use highest growth rate
+    # Increase population by formula
+    if capacity > init_resource:
+        growth_rate = 0.5
+        change = population_formula(init_pop, growth_rate, capacity)
+        # Change population by the number given from formula
+        city["population"] += change
+    # Growth rate is by 0.3 and it decreases
+    else:
+        growth_rate = 0.3
+        change = population_formula(init_pop, growth_rate, capacity)
+        # Change population and decrease it by formula
+        city["population"] -= change
+
+# Get population formula, uses logistic population growth formula
+def population_formula(n, r, k):
+    # Let r be the growth rate
+    # Let n be the initial population
+    # let k be the capacity
+    new_pop = r * n * ((k - n)/k)
+    new_pop = int(new_pop)
+    return new_pop
+
+# After each turn, this happens
+def process_turn(city):
+   # Get the capacity for rating
+   capacity = calculate_capacity(city)
+   adjust_pop(capacity)
 
 # This will display the city's information
 def display_stats(city):
@@ -221,24 +266,28 @@ def display_stats(city):
 
 # Prints out the shop
 def print_shop(shop_inv):
+    # Get each item details based on whats in the shop
     for key, value in shop_inv.items():
-        name, price, description, growth = value
-        print(f"Name: {name:<10} Price:${price:<10} Info:{description:<10} +{growth:<10}")
+        for y in value:
+            # Update the key for each first letter to be capatailized
+            print(f"{y}: {value[y]:<10}")
+        print("-" * 20)
 
 # Updates the shop.
-def shop_menu(city, shop_inv):
-    turn_used = 0
+def shop_menu(city, shop_inv, turn):
     # Print out each selection
     print_shop(shop_inv)
     # Enforce one purchase per turn
     # If more than 1, player should not purchase anything
-    while turn_used == 0:
+    while turn == 0:
         choice = input("Pick Option by name:\n> ").lower()
         # If the choice matches the item name, buy it
         try:
             choice = get_shop_key(shop_inv, choice)
             if shop_inv[choice]:
-                turn_used += 1
+                # Get
+                turn += 1
+                return turn
         except KeyError:
             print("Name not found, try again.")
 
