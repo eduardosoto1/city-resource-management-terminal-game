@@ -8,9 +8,7 @@
 # How does turn based mechanism work?:
 # - Player decides action (build, buy, assign)
 # - Calculate Capacity
-# - Adjust the Rating based on food and water
-# - Create math formula using rating and # of structures to develop # for how much population increases & decreases
-# - Adjust the Population based on rating (lower than 50%, remove population by math formula and higher than 50%, add population by math formula))
+# - Use math formula to decrease or increase population
 # - Consume resources based on population size
 # - Check if the player win or loses
 
@@ -204,7 +202,7 @@ def main_game(city, workers):
                 # Old before i started updating 
                 #game_on = process_turn(city)
                 #turned_on -= 1
-                process_turn(city)
+                game_on = process_turn(city)
             # End game completly
             case 5:
                 game_on = False
@@ -238,6 +236,10 @@ def adjust_pop(capacity):
         # Change population and decrease it by formula
         city["population"] -= change
 
+    # Decrease resources
+    city["water"] -= city["population"]
+    city["food"] -= city["population"]
+
 # Get population formula, uses logistic population growth formula
 def population_formula(n, r, k):
     # Let r be the growth rate
@@ -247,11 +249,21 @@ def population_formula(n, r, k):
     new_pop = int(new_pop)
     return new_pop
 
+
 # After each turn, this happens
 def process_turn(city):
    # Get the capacity for rating
    capacity = calculate_capacity(city)
+   # Adjust city rating
    adjust_pop(capacity)
+
+   # Check if player wins or loses
+   if city["population"] < 0:
+       return False
+   if city["population"] > 5000:
+       print("You won!! Feel free to leave or continue playing.")
+   else:
+       return True
 
 # This will display the city's information
 def display_stats(city):
