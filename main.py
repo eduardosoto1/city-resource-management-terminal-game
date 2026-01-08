@@ -130,33 +130,6 @@ structures = {
 #    city["population"] = max(0, city["population"])
 
 
-#def process_turn(city, worker):
-#    # Rating gain/loss
-#    RATING_BONUS = 2
-#    # Used to see how much population grows by
-#    GROWTH_RATE = 0.10
-#
-#    # Calculate capacity
-#    capacity = min(city["water"], city["food"])
-#    # Do resource consumption
-#    RESOURCE_CONSUMPTION = city["population"]
-#    city["water"] -= RESOURCE_CONSUMPTION
-#    city["food"] -= RESOURCE_CONSUMPTION
-#
-#    # Adjust population
-#    adjust_population(city, workers, capacity, RATING_BONUS, GROWTH_RATE)
-#
-#    # Implement win / lose condition
-#    if city["rating"] <= 0 or city["population"] <= 0 or (city["water"] <= 0 or city["food"] <= 0):
-#        print("You lose")
-#        return False
-#    elif (city["rating"] >= 80.00 and city["population"] >= WIN_POPULATION) and (city["water"] > 0 and city["food"] > 0):
-#        print("You win")
-#        return False
-#    else:
-#        return True
-#
-
 #This assigns workers to structure
 def assign_worker(city, workers, structures):
     # If player has no workers, return
@@ -164,10 +137,16 @@ def assign_worker(city, workers, structures):
         return
     for structure in structures:
         print(structure)
+
+
 def main():
     # Main Game Loop
     main_game(city, workers)
 
+# Print actions player can do
+def print_user_actions(actions):
+    for act in actions:
+        print(f"{act}")
 # The Main Game Loop
 def main_game(city, workers):
     turned_on = 0   # This is used on to allow one purhcase for each turn
@@ -177,9 +156,10 @@ def main_game(city, workers):
         display_stats(city)
 
         # Output to player options they can use
-        for act in actions:
-            print(f"{act}")
-
+        print_user_actions(actions)
+        #for act in actions:
+        #    print(f"{act}")
+        
         # Ask player to pick option
         try:
             choice = input("Pick Option by number: ").strip()
@@ -203,6 +183,7 @@ def main_game(city, workers):
                 #game_on = process_turn(city)
                 #turned_on -= 1
                 game_on = process_turn(city)
+                turned_on = 0
             # End game completly
             case 5:
                 game_on = False
@@ -309,6 +290,20 @@ def get_shop_key(shop_inv, choice):
         search_key = key
         if key == choice:
             return search_key
+
+# Buy Shop for structure or land
+def buy_place():
+    ...
+    # Ask user if they want to purchase structure or land
+
+        # If land then 
+
+        # Else if structure 
+            # Check if user has land available
+                # If not return
+            
+            # Purchase structure
+
 
 if __name__ == "__main__":
     main()
