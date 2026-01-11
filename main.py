@@ -145,7 +145,7 @@ def main_game(city, workers):
                 assign_worker(city, workers, structures)
             # Buy Land / Structures
             case 3: 
-                buy_place()
+                buy_menu()
             # End Turn
             case 4:
                 # Old before i started updating 
@@ -269,8 +269,7 @@ def get_shop_key(shop_inv, choice):
             return search_key
 
 # Buy Shop for structure or land
-def buy_place():
-    ...
+def buy_menu():
     # Ask user if they want to purchase structure or land
     options = ("Buy Structure", "Buy Land")
     # Used to update number list
@@ -283,20 +282,32 @@ def buy_place():
         i += 1
     choice = input("Pick option corresponding to number: ").strip()
     choice = int(choice)
-        # If land then 
+
+    # Correspond number values with option
     match choice:
         case 1: 
+            # Buy Structure
             print("Option 1")
         case 2:
-            print("Option 2")
+            # Buy Land
+            buy_land()
         case _:
+            # No option selected
+            print("This option does not count. Try Again")
             pass
-        # Else if structure 
-            # Check if user has land available
-                # If not return
-            
-            # Purchase structure
 
-
+# Buying land ( Selected in buy_place() )
+def buy_land():
+    price_per_land = 50
+    # Print out the cost of each land
+    print(f"Cost per land: ${price_per_land}\n")
+    # Then make the player pick how much land they would like to buy (Max is 50) 
+    amount = input("> How much land would you like to purchase: ")
+    try:
+        amount = int(amount)
+        print(amount)
+    except ValueError:
+        print("Please insert number to purchase amount of land")
+    # If the player does not have enough for number they picked, show how much more money they would need
 if __name__ == "__main__":
     main()
