@@ -27,7 +27,7 @@ city = {
     "water": 300,   # Required for population
     "food": 300,    # Required for population
     "population": 10,   # number of people in city & win condition
-    "rating": 40.0, # Rating based on city's rank  Should be 50
+    "ores": 0, # Rating based on city's rank  Should be 50
     "workers": 0,   # Workers are used increase ONE of your productions much faster
     "land": 1,  # Used to build structures
     "structures": 0,    # Build structures only on land you own
@@ -79,7 +79,7 @@ shop_inv = {
         "name": "Animals",
         "cost": 300,
         "description": "Converts into food & gives water as well",
-        "growth": 100
+        "growth": 100,
     },
     # Money is the only one that difers from cost as you need ore to buy this one (which is why cost is 1)
     #"money": ["Money", 1, "Upkeeps workers, structures, and used for buying", 100],
@@ -87,7 +87,7 @@ shop_inv = {
         "name": "Money",
         "cost": 1,
         "description": "Upkeeps workers, structures, and used for buying (-1 Ore)",
-        "growth": 1
+        "growth": 1,
     },
 }
 
@@ -95,39 +95,6 @@ structures = {
     "farm": "Workers assigned here",
     "house": "Used to fill up population",
 }
-
-# Used to adjust the city's populating and rating
-
-#def adjust_population(city, workers, capacity, rating_bonus, growth_rate):
- #   try:
-  #      pressure = city["population"] / capacity
-#    except ZeroDivisionError:
-#        pressure = city["population"] / 1
-#    # Adjust population based on current recourses
-#    if city["rating"] < 100:
-#        if city["population"] <= capacity:
-#            # Grow by small fraction of population
-#            city["rating"] += (1 - pressure) * rating_bonus
-#            fixed_num = f"{city["rating"]:.2f}"
-#            fixed_num = float(fixed_num)
-#            city["rating"] = fixed_num
-#        else:
-#            # lose population
-#            city["rating"] -= (pressure - 1) * rating_bonus
-#            fixed_num = f"{city["rating"]:.2f}"
-#            fixed_num = float(fixed_num)
-#            city["rating"] = fixed_num
-    # Clamp the city ratings
-#    city["rating"] = max(0, min(100, city["rating"]))
-
-#    growth = 1
-#    rating_factor = (city["rating"] - 50) / 50
-#    growth += city["population"] * rating_factor * growth_rate
-#    growth = int(growth)
-#    city["population"] += growth
-#    growth -= growth
-#
-#    city["population"] = max(0, city["population"])
 
 
 #This assigns workers to structure
@@ -147,6 +114,8 @@ def main():
 def print_user_actions(actions):
     for act in actions:
         print(f"{act}")
+
+
 # The Main Game Loop
 def main_game(city, workers):
     turned_on = 0   # This is used on to allow one purhcase for each turn
@@ -176,7 +145,7 @@ def main_game(city, workers):
                 assign_worker(city, workers, structures)
             # Buy Land / Structures
             case 3: 
-                pass
+                buy_place()
             # End Turn
             case 4:
                 # Old before i started updating 
@@ -231,7 +200,7 @@ def population_formula(n, r, k):
     return new_pop
 
 
-# After each turn, this happens
+# After each turn, process everything that needs to happen
 def process_turn(city):
    # Get the capacity for rating
    capacity = calculate_capacity(city)
@@ -273,14 +242,22 @@ def shop_menu(city, shop_inv, turn):
     # Enforce one purchase per turn
     # If more than 1, player should not purchase anything
     while turn == 0:
+        # Ask player to pick item corresponding to name
         choice = input("Pick Option by name:\n> ").lower()
         # If the choice matches the item name, buy it
         try:
             choice = get_shop_key(shop_inv, choice)
-            if shop_inv[choice]:
-                # Get
-                turn += 1
-                return turn
+            # Match cost and subtract it from inventory
+            if shop_inv[choice]["cost"] == 1:
+                # If player doesn't have ores, take them back to choosing.
+                if city["ore"] < 0:
+                    print("You do not have enough ore to purchase any")
+                    return 
+                # Remove the cost by one 
+                city["ore"] -= 1
+                print("You have chosen the ore")
+            turn += 1
+            return turn
         except KeyError:
             print("Name not found, try again.")
 
@@ -295,9 +272,25 @@ def get_shop_key(shop_inv, choice):
 def buy_place():
     ...
     # Ask user if they want to purchase structure or land
-
+    options = ("Buy Structure", "Buy Land")
+    # Used to update number list
+    i = 1
+    # Create empty space from status to choices to pick from
+    print()
+    # Print out options to pick from
+    for option in options:
+        print(f"{i}: {option}")
+        i += 1
+    choice = input("Pick option corresponding to number: ").strip()
+    choice = int(choice)
         # If land then 
-
+    match choice:
+        case 1: 
+            print("Option 1")
+        case 2:
+            print("Option 2")
+        case _:
+            pass
         # Else if structure 
             # Check if user has land available
                 # If not return
