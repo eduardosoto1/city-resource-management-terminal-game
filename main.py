@@ -287,7 +287,7 @@ def buy_menu():
     match choice:
         case 1: 
             # Buy Structure
-            print("Option 1")
+            print("Buy Structure needs to be added")
         case 2:
             # Buy Land
             buy_land()
@@ -305,9 +305,19 @@ def buy_land():
     amount = input("> How much land would you like to purchase: ")
     try:
         amount = int(amount)
-        print(amount)
+        cost = price_per_land * amount
     except ValueError:
         print("Please insert number to purchase amount of land")
     # If the player does not have enough for number they picked, show how much more money they would need
+    if city["money"] < cost:
+        print("You do not have enough to purchase this")
+        price_needed = cost - city["money"]
+        print(f"Collect ${price_needed}")
+        return
+
+    # Remove money from player based on amount
+    city["money"] -= cost
+    # Add land based on amount
+    city["land"] += amount
 if __name__ == "__main__":
     main()
