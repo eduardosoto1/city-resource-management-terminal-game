@@ -161,9 +161,13 @@ def main_game(city, workers):
                 print("This option is not a choice, choices are 1-5")
 
 def calculate_capacity(city):
+
     # Capacity comes from the lowest item we have, either water or food.
     capacity = min(city["water"], city["food"])
     capacity = int(capacity)
+
+    if capacity < 0:
+        print("WARNING: Food & water is below zero! Buy Resources")
     return capacity
 
 # Grows or decreases
