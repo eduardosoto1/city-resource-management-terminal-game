@@ -91,11 +91,24 @@ shop_inv = {
     },
 }
 
+# List of properties you can buy
 structures = {
-    "farm": "Workers assigned here",
-    "house": "Used to fill up population",
+    "farm": {
+        "name": "Farm",
+        "description": "Gives extra food & water per farm you have (Assign worker here)",
+        "quantity": 0
+    },
+    "house": {
+        "name": "House",
+        "description": "Gives place for worker to stay at (More placed, the more workers you can have)",
+        "quantity": 0
+    },
+    "bank": {
+        "name": "Bank",
+        "description": "Assign worker here to earn +50 money per turn",
+        "quantity": 0
+    },
 }
-
 
 #This assigns workers to structure
 def assign_worker(city, workers, structures):
@@ -126,9 +139,6 @@ def main_game(city, workers):
 
         # Output to player options they can use
         print_user_actions(actions)
-        #for act in actions:
-        #    print(f"{act}")
-        
         # Ask player to pick option
         try:
             choice = input("Pick Option by number: ").strip()
@@ -148,9 +158,7 @@ def main_game(city, workers):
                 buy_menu()
             # End Turn
             case 4:
-                # Old before i started updating 
-                #game_on = process_turn(city)
-                #turned_on -= 1
+                # If player loses
                 game_on = process_turn(city)
                 turned_on = 0
             # End game completly
@@ -161,13 +169,13 @@ def main_game(city, workers):
                 print("This option is not a choice, choices are 1-5")
 
 def calculate_capacity(city):
-
     # Capacity comes from the lowest item we have, either water or food.
     capacity = min(city["water"], city["food"])
     capacity = int(capacity)
 
+    # Warn player that they are going to negative meaning they will lose population
     if capacity < 0:
-        print("WARNING: Food & water is below zero! Buy Resources")
+        print("WARNING: Food & water is below zero! Buy Resources before you risk losing population")
     return capacity
 
 # Grows or decreases
@@ -291,7 +299,7 @@ def buy_menu():
     match choice:
         case 1: 
             # Buy Structure
-            print("Buy Structure needs to be added")
+            buy_struct()
         case 2:
             # Buy Land
             buy_land()
@@ -299,6 +307,25 @@ def buy_menu():
             # No option selected
             print("This option does not count. Try Again")
             pass
+# Output the structures in a formatted way
+def print_struct(structures):
+    print("-" * 15)
+    for i, j in structures.items():
+        for y in j:
+            print(f"{y}: {j[y]}")
+        print("-" * 15)
+
+# Buy Structure (Found in buy_place)
+def buy_struct():
+    # If no land available, do not run function
+    if city["land"] <= city["structures"]:
+        print(f"All your current land is filled! Buy more using option 2.")
+        return
+    # Output Structure name & its description
+    print_struct(structures)    
+    # Ask user what they would like to do
+    choice = input("Pick by name")
+    # Apply effect based on what structure does
 
 # Buying land ( Selected in buy_place() )
 def buy_land():
@@ -323,5 +350,6 @@ def buy_land():
     city["money"] -= cost
     # Add land based on amount
     city["land"] += amount
+
 if __name__ == "__main__":
     main()
