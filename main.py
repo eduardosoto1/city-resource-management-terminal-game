@@ -307,6 +307,15 @@ def buy_menu():
             # No option selected
             print("This option does not count. Try Again")
             pass
+
+# Update quantity of structure
+def update_struct(choice):
+    for key, value in structures.items():
+        if key == choice:
+            structures[choice]["quantity"] += 1
+        else:
+            print("This option is not a choice.")
+
 # Output the structures in a formatted way
 def print_struct(structures):
     print("-" * 15)
@@ -324,8 +333,12 @@ def buy_struct():
     # Output Structure name & its description
     print_struct(structures)    
     # Ask user what they would like to do
-    choice = input("Pick by name")
-    # Apply effect based on what structure does
+    choice = input("Pick by name: ").lower()
+    # Apply effect based on what structure does and update quantity
+    update_struct(choice)    
+    # Update the number of structures
+    city["structures"] += 1
+ 
 
 # Buying land ( Selected in buy_place() )
 def buy_land():
