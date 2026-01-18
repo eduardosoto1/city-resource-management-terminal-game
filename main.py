@@ -52,21 +52,21 @@ shop_inv = {
     # Wood is used to build structures
     "wood": {
         "quantity": 0,
-        "cost": 300,
+        "cost": 100,
         "description": "Builds structures",
     },
     # Metals is used build power grids and infrastructure
     #"metals": ["Metals", 300, "Power grid & infrastructure (FOR LATER)", 1],
     "metals": {
         "quantity": 0,
-        "cost": 300,
+        "cost": 200,
         "description": "Builds power grid & infrastructure",
     },
     # Ores will be used to sell to gain money or invest (FUTURE)
     #"ore": ["Ore", 300, "Sell for money or (INVEST | FOR FUTURE)", 1],
     "ore": {
         "quantity": 0,
-        "cost": 300,
+        "cost": 500,
         "description": "Sell for money",
     },
     # Animals will convert into food and water for the city's population
@@ -252,7 +252,32 @@ def shop_menu(city, shop_inv, turn):
             choice = get_shop_key(shop_inv, choice)
             # Match cost and subtract it from inventory
             if shop_inv[choice]:
+                # Update quantity
                 shop_inv[choice]["quantity"] += 1
+                # Subtract the cost
+                cost = shop_inv[choice]["cost"]
+                print(f"-{cost}")
+                match cost:
+                    # Buys workers
+                    case 2000:
+                        print("HINT: Workers are used to automate the processes.")
+                    # Buys animals
+                    case 300:
+                        city["water"] += 300
+                        city["food"] += 300
+                        print("Updated resources by +300!")
+                    # Buys metal
+                    case 200:
+                        pass
+                    case 500:
+                        print("HINT: Reinvest this")
+                    # Buys wood
+                    case 100:
+                        print("HINT: You are now able to buy structures!")
+                    case _:
+                        print("How'd you end up here?")
+                # Subtract cost from user's money
+                city["money"] -= cost
             turn += 1
             return turn
         except KeyError:
