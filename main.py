@@ -58,7 +58,7 @@ shop_inv = {
     # Metals is used build power grids and infrastructure
     #"metals": ["Metals", 300, "Power grid & infrastructure (FOR LATER)", 1],
     "metals": {
-        "quantity": "Metals",
+        "quantity": 0,
         "cost": 300,
         "description": "Builds power grid & infrastructure",
     },
@@ -229,6 +229,7 @@ def display_stats(city):
 def print_shop(shop_inv):
     # Get each item details based on whats in the shop
     for key, value in shop_inv.items():
+        print(f"{key.capitalize()}:")
         for y in value:
             # Update the key for each first letter to be capatailized
             print(f"{y}: {value[y]:<10}")
@@ -236,25 +237,22 @@ def print_shop(shop_inv):
 
 # Updates the shop.
 def shop_menu(city, shop_inv, turn):
-    # Print out each selection
-    print_shop(shop_inv)
     # Enforce one purchase per turn
     # If more than 1, player should not purchase anything
+    if turn > 0: 
+        print("You are only allowed to purchase one item per turn.\nPlease end your turn to purchase again.")
     while turn == 0:
+        # Print out each selection
+        print_shop(shop_inv)
+
         # Ask player to pick item corresponding to name
         choice = input("Pick Option by name:\n> ").lower()
         # If the choice matches the item name, buy it
         try:
             choice = get_shop_key(shop_inv, choice)
             # Match cost and subtract it from inventory
-            if shop_inv[choice]["cost"] == 1:
-                # If player doesn't have ores, take them back to choosing.
-                if city["ore"] < 0:
-                    print("You do not have enough ore to purchase any")
-                    return 
-                # Remove the cost by one 
-                city["ore"] -= 1
-                print("You have chosen the ore")
+            if shop_inv[choice]:
+                shop_inv[choice]["quantity"] += 1
             turn += 1
             return turn
         except KeyError:
@@ -297,11 +295,15 @@ def buy_menu():
 
 # Update quantity of structure
 def update_struct(choice):
-    for key, value in structures.items():
-        if key == choice:
-            structures[choice]["quantity"] += 1
-        else:
-            print("This option is not a choice.")
+    if choice in structures:
+        # Update the quantity of the item            
+        structures[choice]["quantity"] += 1
+        # Update number of structures
+        city["structures"] += 1
+    # Item doesn't exist, so don't let player update quantity
+    else:                
+        print("This is an unavailable option")
+        
 
 # Output the structures in a formatted way
 def print_struct(structures):
@@ -317,8 +319,6 @@ def buy_struct():
     if city["land"] <= city["structures"]:
         print(f"All your current land is filled! Buy more using option 2.")
         return
-    # If player has no wood, then do not allow them to buy
-    
 
     # Output Structure name & its description
     print_struct(structures)    
@@ -326,8 +326,6 @@ def buy_struct():
     choice = input("Pick by name: ").lower()
     # Apply effect based on what structure does and update quantity
     update_struct(choice)    
-    # Update the number of structures
-    city["structures"] += 1
  
 
 # Buying land ( Selected in buy_place() )
