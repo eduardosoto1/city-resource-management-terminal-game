@@ -155,8 +155,25 @@ def main_game(city, workers):
             case _:
                 print("This option is not a choice, choices are 1-5")
 
+# Assign workers to structures to automate tasks
+def assign_worker(city, workers, structures):
+    # No workers are available
+    if city["workers"] < 1:
+        print("No workers are available, buy some in buy menu")
+        return
+
+    # No structures are available
+    if city["structures"] < 1:
+        print("No structures available.")
+    # Print out the structures
+    print_struct(structures)
+    # Ask player to assign worker to structure
+
+#
+
+# Capacity is calculated to detect lowest item we have
 def calculate_capacity(city):
-    # Capacity comes from the lowest item we have, either water or food.
+    # Capacity comes from resources (WATER AND FOOD)
     capacity = min(city["water"], city["food"])
     capacity = int(capacity)
 
@@ -249,6 +266,7 @@ def shop_menu(city, shop_inv, turn):
         choice = input("Pick Option by name:\n> ").lower()
         # If the choice matches the item name, buy it
         try:
+            # Gather shop key
             choice = get_shop_key(shop_inv, choice)
             # Match cost and subtract it from inventory
             if shop_inv[choice]:
@@ -257,10 +275,15 @@ def shop_menu(city, shop_inv, turn):
                 # Subtract the cost
                 cost = shop_inv[choice]["cost"]
                 print(f"-{cost}")
+
+                # -----------
+                # TURN TO FUNCTION 
+                # ------------
                 match cost:
                     # Buys workers
                     case 2000:
                         print("HINT: Workers are used to automate the processes.")
+                        city["workers"] += 1
                     # Buys animals
                     case 300:
                         city["water"] += 300
@@ -276,14 +299,19 @@ def shop_menu(city, shop_inv, turn):
                         print("HINT: You are now able to buy structures!")
                     case _:
                         print("How'd you end up here?")
+                # -------------
+                # 
+                # -------------
+
                 # Subtract cost from user's money
                 city["money"] -= cost
+            # Update turn so player isn't allowed to run menu again till process turn
             turn += 1
             return turn
         except KeyError:
             print("Name not found, try again.")
 
-# Go through each name and 
+# Go through each name and return key if it exists
 def get_shop_key(shop_inv, choice):
     for key, value in shop_inv.items():
         search_key = key
