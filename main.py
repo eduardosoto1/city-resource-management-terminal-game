@@ -83,27 +83,22 @@ structures = {
     "farm": {
         "name": "Farm",
         "description": "Gives extra food & water per farm you have (Assign worker here)",
-        "quantity": 0
+        "quantity": 0,
+        "workers": 0
     },
     "house": {
         "name": "House",
-        "description": "Gives place for worker to stay at (More placed, the more workers you can have)",
-        "quantity": 0
+        "description": "Gives place for population to stay at (+5 population per house)",
+        "quantity": 0,
+        "workers": 0
     },
     "bank": {
         "name": "Bank",
         "description": "Assign worker here to earn +50 money per turn",
-        "quantity": 0
+        "quantity": 0,
+        "workers": 0
     },
 }
-
-#This assigns workers to structure
-def assign_worker(city, workers, structures):
-    # If player has no workers, return
-    if city["workers"] < 1:
-        return
-    for structure in structures:
-        print(structure)
 
 
 def main():
@@ -161,15 +156,22 @@ def assign_worker(city, workers, structures):
     if city["workers"] < 1:
         print("No workers are available, buy some in buy menu")
         return
-
     # No structures are available
     if city["structures"] < 1:
         print("No structures available.")
+        return
     # Print out the structures
     print_struct(structures)
     # Ask player to assign worker to structure
-
-#
+    choice = input("Pick structure by name: ").lower()
+    assign_to_struct(choice)
+    
+def assign_to_struct(choice):
+    if choice in structures:
+        structures[choice]["workers"] += 1
+        city["workers"] -= 1
+    else:
+        print("This option is not allowed")
 
 # Capacity is calculated to detect lowest item we have
 def calculate_capacity(city):
@@ -215,21 +217,25 @@ def population_formula(n, r, k):
     new_pop = int(new_pop)
     return new_pop
 
+def apply_struct_effect():
+    farm = structures["farm"] 
 
 # After each turn, process everything that needs to happen
 def process_turn(city):
-   # Get the capacity for rating
-   capacity = calculate_capacity(city)
-   # Adjust city rating
-   adjust_pop(capacity)
+    # Apply structures effects
+    apply_struct_effect()
+    # Get the capacity for rating
+    capacity = calculate_capacity(city)
+    # Adjust city rating
+    adjust_pop(capacity)
 
-   # Check if player wins or loses
-   if city["population"] < 0:
-       return False
-   if city["population"] > 5000:
-       print("You won!! Feel free to leave or continue playing.")
-   else:
-       return True
+    # Check if player wins or loses
+    if city["population"] < 0:
+        return False
+    if city["population"] > 5000:
+        print("You won!! Feel free to leave or continue playing.")
+     else:
+         return True
 
 # This will display the city's information
 def display_stats(city):
