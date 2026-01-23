@@ -82,7 +82,7 @@ shop_inv = {
 structures = {
     "farm": {
         "name": "Farm",
-        "description": "Gives extra food & water per farm you have (Assign worker here)",
+        "description": "Gives extra food & water per farm you have (+300 each structure)",
         "quantity": 0,
         "workers": 0
     },
@@ -94,7 +94,7 @@ structures = {
     },
     "bank": {
         "name": "Bank",
-        "description": "Assign worker here to earn +50 money per turn",
+        "description": "Assign worker here to earn +200 money per turn",
         "quantity": 0,
         "workers": 0
     },
@@ -187,20 +187,20 @@ def calculate_capacity(city):
 # Grows or decreases
 def adjust_pop(capacity):
     # Initial population is 10
-    init_pop = 10
+    n = city["population"]
     # Initial food is 100
     init_resource = 100
     # If the lowest resource is higher than the inital resource, use highest growth rate
     # Increase population by formula
     if capacity > init_resource:
         growth_rate = 0.5
-        change = population_formula(init_pop, growth_rate, capacity)
+        change = population_formula(n, growth_rate, capacity)
         # Change population by the number given from formula
         city["population"] += change
     # Growth rate is by 0.3 and it decreases
     else:
         growth_rate = 0.3
-        change = population_formula(init_pop, growth_rate, capacity)
+        change = population_formula(n, growth_rate, capacity)
         # Change population and decrease it by formula
         city["population"] -= change
 
@@ -211,14 +211,42 @@ def adjust_pop(capacity):
 # Get population formula, uses logistic population growth formula
 def population_formula(n, r, k):
     # Let r be the growth rate
-    # Let n be the initial population
+    # Let n be the population
     # let k be the capacity
     new_pop = r * n * ((k - n)/k)
     new_pop = int(new_pop)
     return new_pop
 
+
+# Based on worker's quantity on a structure, this applies the effect
 def apply_struct_effect():
-    farm = structures["farm"] 
+    # The quantity of how much the player has of a structure
+    farm = structures["farm"]["workers"]
+    house = structures["house"]["workers"]
+    bank = structures["bank"]["workers"]
+    # The upgrade that each quantity does
+    farm_upgrade = 300
+    house_upgrade = 5
+    bank_upgrade = 200      
+    # apply each effect based on quantity and upgrade value
+    # Farm Upgrade
+    if farm > 0:
+        update = farm * farm_upgrade
+        print(f"Farm Upgrade Each Turn: {update}")
+        city["food"] += update
+        city["water"] += update
+    # House upgrade
+    if house > 0:
+        update = house * house_upgrade
+        print(f"Population Update: {update}")
+        city["population"] += update
+    # Bank Upgrade
+    if bank > 0:
+        update = bank * bank_upgrade
+        print(f"Money gain: {update}")
+        city["money"] += update
+
+
 
 # After each turn, process everything that needs to happen
 def process_turn(city):
@@ -234,8 +262,8 @@ def process_turn(city):
         return False
     if city["population"] > 5000:
         print("You won!! Feel free to leave or continue playing.")
-     else:
-         return True
+    else:
+        return True
 
 # This will display the city's information
 def display_stats(city):
